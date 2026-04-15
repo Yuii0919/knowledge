@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>知識管理｜期中考練習</title>
+  <style>
+    :root {
+      --bg: #f6f7fb;
+      --card: #fff;
+      --text: #1a1d26;
+      --muted: #5c6473;
+      --accent: #2563eb;
+      --accent-soft: #dbeafe;
+      --ok: #15803d;
+      --bad: #b91c1c;
+      --border: #e2e8f0;
+      --radius: 12px;
+      --shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.55;
+    }
+    header {
+      background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+      color: #fff;
+      padding: 1.25rem 1rem 1.5rem;
+    }
+    header h1 { margin: 0 0 0.35rem; font-size: 1.35rem; font-weight: 700; }
+    header p { margin: 0; opacity: 0.92; font-size: 0.9rem; }
+    .wrap { max-width: 720px; margin: 0 auto; padding: 0 1rem 2.5rem; }
+    .wrap.wide { max-width: 820px; }
+    nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin: -1.25rem 0 1.25rem;
+      position: relative;
+      z-index: 2;
+    }
+    nav button {
+      border: none;
+      background: var(--card);
+      color: var(--text);
+      padding: 0.55rem 0.85rem;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+    }
+    nav button:hover { border-color: #cbd5e1; }
+    nav button.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+    .page { display: none; animation: fade 0.2s ease; }
+    .page.active { display: block; }
+    @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 1.15rem 1.25rem;
+      margin-bottom: 1rem;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+    }
+    .card h2 { margin: 0 0 0.65rem; font-size: 1.05rem; }
+    .muted { color: var(--muted); font-size: 0.88rem; }
+    .mc-settings {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      gap: 0.75rem 1rem;
+      margin-bottom: 1rem;
+      padding: 0.75rem;
+      background: #f8fafc;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+    .mc-settings label { font-size: 0.88rem; display: flex; flex-direction: column; gap: 0.25rem; }
+    .mc-settings input[type="number"] {
+      width: 5rem;
+      padding: 0.4rem 0.5rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      font-size: 0.95rem;
+    }
+    .pager {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      margin: 0 0 1rem;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .pager-info { font-size: 0.9rem; font-weight: 600; }
+    .pager-btns { display: flex; gap: 0.5rem; }
+    .q-block { margin-bottom: 1.35rem; padding-bottom: 1.25rem; border-bottom: 1px dashed var(--border); }
+    .q-block:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+    .q-title { font-weight: 600; margin-bottom: 0.5rem; }
+    .options label {
+      display: block;
+      margin: 0.35rem 0;
+      padding: 0.45rem 0.6rem;
+      border-radius: 8px;
+      cursor: pointer;
+      border: 1px solid transparent;
+    }
+    .options label:hover { background: var(--accent-soft); }
+    .options input { margin-right: 0.45rem; }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.65rem; }
+    button.primary {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    button.secondary {
+      background: #fff;
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    button:disabled { opacity: 0.45; cursor: not-allowed; }
+    .result { margin-top: 0.5rem; font-size: 0.88rem; font-weight: 600; }
+    .result.ok { color: var(--ok); }
+    .result.bad { color: var(--bad); }
+    details {
+      margin-bottom: 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.5rem 0.75rem;
+      background: #fafbfc;
+    }
+    summary { cursor: pointer; font-weight: 600; }
+    details.sa-item { margin-bottom: 0.85rem; }
+    .sa-split { margin-top: 0.55rem; }
+    .sa-brief {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 8px;
+      padding: 0.65rem 0.75rem;
+      margin-bottom: 0.6rem;
+    }
+    .sa-label {
+      display: block;
+      font-size: 0.76rem;
+      font-weight: 700;
+      color: #1e40af;
+      margin-bottom: 0.35rem;
+      letter-spacing: 0.03em;
+    }
+    .sa-brief-txt,
+    .sa-brief-ul { margin: 0; font-size: 0.88rem; }
+    .sa-brief-ul { padding-left: 1.15rem; }
+    .sa-brief-ul li { margin: 0.22rem 0; }
+    details.sa-detail-fold {
+      margin: 0;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.45rem 0.65rem;
+      background: #fff;
+    }
+    details.sa-detail-fold > summary { font-size: 0.88rem; }
+    .sa-guide { margin-top: 0.45rem; font-size: 0.86rem; line-height: 1.52; }
+    .sa-guide-lead { margin: 0 0 0.45rem; color: var(--muted); }
+    .sa-h4 { margin: 0.6rem 0 0.2rem; font-size: 0.8rem; color: #1e3a8a; }
+    .sa-ol, .sa-ul { margin: 0.15rem 0 0.35rem 1rem; padding: 0; }
+    .sa-ol li, .sa-ul li { margin: 0.22rem 0; }
+    .sa-pit li { color: #991b1b; }
+    footer {
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--muted);
+      padding: 1rem;
+    }
+    .score-bar { font-size: 0.9rem; margin-top: 0.5rem; }
+    .article-prose { font-size: 0.92rem; }
+    .article-prose h2 {
+      font-size: 1.05rem;
+      margin: 1.35rem 0 0.55rem;
+      padding-bottom: 0.35rem;
+      border-bottom: 1px solid var(--border);
+      color: #1e3a8a;
+    }
+    .article-prose h2:first-child { margin-top: 0; }
+    .article-prose h3 { font-size: 0.98rem; margin: 1rem 0 0.4rem; }
+    .article-prose p { margin: 0.5rem 0; }
+    .article-prose ul, .article-prose ol { margin: 0.35rem 0 0.75rem 1.2rem; padding: 0; }
+    .article-prose li { margin: 0.28rem 0; }
+    .article-prose ul ul { margin-top: 0.2rem; margin-bottom: 0.35rem; }
+    .article-prose strong { font-weight: 600; }
+    .source-note {
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-top: 0.75rem;
+      padding-top: 0.75rem;
+      border-top: 1px dashed var(--border);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>知識管理｜期中考練習</h1>
+      <p>含：<strong>範圍・重點・成績</strong>、<strong>第一／二章段落整理</strong>，以及選擇題與論述問答練習（內容同步 <code>output</code> 內對應 .md）</p>
+    </div>
+  </header>
+
+  <div class="wrap wide">
+    <nav id="nav" aria-label="頁面切換">
+      <button type="button" data-page="ref">範圍・重點・分數</button>
+      <button type="button" data-page="ch1">第一章段落</button>
+      <button type="button" data-page="ch2">第二章段落</button>
+      <button type="button" data-page="mc" class="active">選擇題</button>
+      <button type="button" data-page="sa">論述問答</button>
+    </nav>
+
+    <section id="page-ref" class="page" aria-labelledby="ref-heading">
+      <div class="card">
+        <h2 id="ref-heading">範圍、考點重點與成績計算</h2>
+        <p class="muted">以下與 <code>知識管理(分數計算及範圍).md</code> 一致，方便瀏覽器內速讀。</p>
+        <div class="article-prose">
+          <h2>一、最可能考的章節範圍</h2>
+          <ul>
+            <li>第一章：知識定義、分類、特質、整合／移轉／創造／發展</li>
+            <li>第二章：知識經濟內涵、效益、發展影響、AI 與知識管理</li>
+          </ul>
+
+          <h2>二、老師高機率會考的核心觀念</h2>
+
+          <h3>1) 資料、資訊、知識、智慧（必考等級）</h3>
+          <ul>
+            <li>資料：原始、未整理內容。</li>
+            <li>資訊：資料經過整理、分類、標籤後，可讀可用。</li>
+            <li>知識：資訊經過比較、理解、內化，可被應用與傳承。</li>
+            <li>智慧：大量知識結合經驗後，能做較佳判斷與決策。</li>
+          </ul>
+
+          <h3>2) 顯性知識 vs 內隱知識（必考等級）</h3>
+          <ul>
+            <li>顯性知識：可文字化、可文件化、可教學（如教材、SOP）。</li>
+            <li>內隱知識：偏手感、經驗、直覺，不易完整說清楚（如工藝火候）。</li>
+            <li>重點：知識管理的關鍵工作是把可轉換的內隱知識外顯化。</li>
+          </ul>
+
+          <h3>3) 知識管理流程（高機率）</h3>
+          <ul>
+            <li>取得：先蒐集知識來源。</li>
+            <li>儲存：以筆記、文件、系統留存，避免遺失。</li>
+            <li>整理：分類、標籤、建立架構。</li>
+            <li>移轉：分享、教學、交接。</li>
+            <li>應用與創造：落地使用，再產生新知識。</li>
+          </ul>
+
+          <h3>4) 知識特質（高機率）</h3>
+          <ul>
+            <li>知識不易被「用掉」，但會過期。</li>
+            <li>在網路與 AI 時代，知識容易過載，需先選擇可用重點。</li>
+            <li>能否文字化，會直接影響是否能傳承。</li>
+          </ul>
+
+          <h3>5) 知識經濟（第二章主軸，必讀）</h3>
+          <ul>
+            <li>核心：把個人／組織知識轉成價值、效率或收益。</li>
+            <li>本質：經濟活動從勞力導向，逐步轉向知識導向。</li>
+            <li>典型例子：內容創作、專業教學、顧問服務、知識型自媒體。</li>
+          </ul>
+
+          <h3>6) AI 與知識管理（老師會延伸問）</h3>
+          <ul>
+            <li>優點：快速整理、萃取、分類、生成練習題。</li>
+            <li>風險：片段化學習、素食知識、缺乏驗證與思辨。</li>
+            <li>正確用法：AI 先整理，人類再檢核與判斷。</li>
+          </ul>
+
+          <h2>三、可能的考試題型（推估）</h2>
+          <ul>
+            <li>名詞解釋題：知識、顯性知識、內隱知識、知識經濟。</li>
+            <li>比較題：資料／資訊／知識／智慧差異。</li>
+            <li>應用題：如何把內隱知識變顯性知識？如何避免知識流失？</li>
+            <li>論述問答：AI 如何幫助知識管理？可能風險是什麼？</li>
+          </ul>
+
+          <h2>五、考前 30 分鐘速讀清單</h2>
+          <ul>
+            <li>一定會寫：資料／資訊／知識／智慧四層差異。</li>
+            <li>一定會寫：顯性／內隱知識定義 + 各 1 個例子。</li>
+            <li>一定會寫：知識管理流程 5 步驟（取得、儲存、整理、移轉、應用）。</li>
+            <li>一定會寫：知識經濟一句話定義 + 1 個生活案例。</li>
+            <li>一定會寫：AI 優點 2 點 + 風險 2 點 + 正確用法 1 句結論。</li>
+          </ul>
+
+          <h2>六、上課內容</h2>
+          <ul>
+            <li>老師一直在強調：<strong>不要死背定義，要用自己的話講得出來</strong>。</li>
+            <li>第一章主線是：你拿到一堆資料後，怎麼整理、分類、內化，最後變成你真的會用的知識。</li>
+            <li>很多內容都在對比：<strong>顯性知識（可寫下來）</strong>和<strong>內隱知識（靠經驗手感）</strong>，並說明為什麼內隱知識最難傳承。</li>
+            <li>老師反覆提到知識管理不只是「收集」，而是要能<strong>儲存、分享、交接、再利用</strong>，否則人一走知識就斷掉。</li>
+            <li>第二章在講「知識經濟」：怎麼把知識變成價值與收益，不論是公司成長或個人變現。</li>
+            <li>課堂有大量連到現況：數位轉型、AI 工具、知識型內容創作，重點是要會借力使力。</li>
+            <li>但老師也提醒：AI 可以加速整理，不代表可直接照抄；如果不判斷，會變成片段知識，思辨能力反而下降。</li>
+            <li>整體核心其實一句話：<strong>把知識變成可理解、可行動、可傳承、可創造新價值的能力。</strong></li>
+          </ul>
+
+          <h2>七、上課要注意的事</h2>
+          <ul>
+            <li>重概念、輕背誦：學者原文可參考，但考試更看你能否用白話講清楚。</li>
+            <li>要會分類與整理：把資料做標籤、架構、重點化，才算真正有學到知識管理。</li>
+            <li>要有自己的筆記語言：老師多次提到「寫得出重點筆記」代表你已進入知識層次。</li>
+            <li>題目可能偏情境應用：不只問定義，還會問你如何在個人或組織實際落地。</li>
+            <li>AI 可用但不能照抄：要檢核正確性、避免片段化，答題時最好能寫出你的判斷。</li>
+            <li>用例子會加分：回答顯性／內隱、知識移轉、知識經濟時，附生活或工作案例更完整。</li>
+          </ul>
+
+          <h2>八、成績計算方式（已確認）</h2>
+          <ul>
+            <li>平時成績：50%</li>
+            <li>期中考：20%</li>
+            <li>期末考：30%</li>
+          </ul>
+
+          <h3>平時成績（50%）細項</h3>
+          <ul>
+            <li>課堂出席（15%）
+              <ul>
+                <li>每堂點名，翹課一堂扣 0.5，扣完為止。</li>
+                <li>未點名者可於下課前人工補點。</li>
+                <li>有報備且因故無法到課者，不記曠課。</li>
+              </ul>
+            </li>
+            <li>課堂表現（10%）
+              <ul>
+                <li>上課提問、參與討論、協助同學、分享相關資訊等。</li>
+              </ul>
+            </li>
+            <li>課堂互動作業（15%）
+              <ul>
+                <li>每章節課前線上互動（第一堂點名後填答）。</li>
+                <li>每章節心得回饋（第三堂下課前約 10 分鐘填答）。</li>
+                <li>本學期約四到五個主題學習單（紙本或線上，視情況）。</li>
+              </ul>
+            </li>
+            <li>多元表現（10%）
+              <ul>
+                <li>期初 5%：<code>2/26</code> SDG 考試與心得。</li>
+                <li>期末 5%：<code>6/25</code> 主題未定。</li>
+              </ul>
+            </li>
+          </ul>
+
+          <h3>期中考（20%）</h3>
+          <ul>
+            <li>形式：個人報告 + 筆試。</li>
+            <li>期中考內部配比（已公告）：
+              <ul>
+                <li>個人報告：30%（<code>4/27</code> 截止）</li>
+                <li>筆試：70%（其中約 20%–30% 為選擇題，其餘為問答題）</li>
+              </ul>
+            </li>
+            <li>書面報告內容公告時間：<code>4/17</code> 後告知。</li>
+            <li>筆試範圍：<code>CH01–CH03 + 劉老師上課內容</code>。</li>
+          </ul>
+
+          <h3>期末考（30%）</h3>
+          <ul>
+            <li>暫定形式：團體成果報告 + 個人報告 + 心得反思 + 筆試。</li>
+          </ul>
+        </div>
+        <p class="source-note">若老師有更新公告，請以課堂／系統為準，並同步修改 <code>知識管理(分數計算及範圍).md</code> 後再調整本頁。</p>
+      </div>
+    </section>
+
+    <section id="page-ch1" class="page" aria-labelledby="ch1-heading">
+      <div class="card">
+        <h2 id="ch1-heading">知識管理 1｜段落整理</h2>
+        <p class="muted">與 <code>知識管理1_段落整理.md</code> 相同。</p>
+        <div class="article-prose">
+          <h2>一、課程開場與章節主軸</h2>
+          <p>本章重點不是直接進入知識管理工具，而是先建立知識發展的基本觀念。老師強調這本教材雖非最新名著，但內容相對淺白，適合入門。第一章核心包含六塊：知識定義、知識分類、知識特質，以及知識整合、移轉、創造、發展。整體重點是理解概念與流程，不是死背學者定義。</p>
+
+          <h2>二、什麼是知識：重白話、重理解</h2>
+          <p>老師指出，課本定義通常偏文言且抽象，背了也不一定會用。真正重要的是能用自己的語言說明「你如何理解一件事、如何用來解決問題」。知識具有流動性，會隨情境、經驗與用途改變。若能連結個人經驗並持續重組，知識才會變成可用的能力，而不是短暫記憶。</p>
+
+          <h2>三、資料、資訊、知識、智慧的層次</h2>
+          <p>資料是原始素材；經過整理、標籤、分類後成為資訊；資訊經過比較、驗證、內化後形成知識；大量知識結合經驗與判斷，才進一步形成智慧。老師特別提醒，多數人常停在資料與資訊層次，若沒有主動分類與重組，就很難進入知識層次。能把一本書濃縮成關鍵字小抄，代表你已在做知識化。</p>
+
+          <h2>四、知識要能文字化，才容易傳承</h2>
+          <p>知識若無法被表達與記錄，傳承會非常困難。文字、圖像、符號、流程等都是知識外顯化的工具。老師以數學與語言學習為例，正因知識被標準化與文字化，才能跨世代教學。這也解釋了為何許多領域有長期的「知識斷層」：很多關鍵經驗停留在個人腦中，未被有效記錄。</p>
+
+          <h2>五、顯性知識與內隱知識</h2>
+          <p>顯性知識是可寫下來、可說清楚、可教學的內容；內隱知識則多屬手感、直覺、經驗判斷，難以完整描述。老師用廚師火候、老師傅工藝等案例說明：即使錄影與示範可以輔助，真正上手仍需反覆實作與體會。知識管理的重要工作，就是盡可能把可轉換的內隱知識外顯化，提高移轉成功率。</p>
+
+          <h2>六、知識管理不只蒐集，更是流程管理</h2>
+          <p>知識管理不是把資料塞進資料庫就結束，而是包含取得、儲存、整理、移轉、應用、再創造。若只有取得而沒有儲存，知識會快速遺失；若只有儲存而沒有移轉，知識不會產生價值。老師反覆強調流程概念：知識要被留下、被用到、被分享，才算真正管理。</p>
+
+          <h2>七、組織情境與個人情境可互相套用</h2>
+          <p>雖然課本多以企業為案例，但老師鼓勵同學先套用在個人學習：用數位工具分類筆記、建立可檢索知識庫、減少重複整理成本。企業常談數位轉型，本質上個人也有同樣轉型需求。若學習內容沒有長期累積，遇到新議題時容易「重新歸零」。</p>
+
+          <h2>八、AI 時代的學習機會與風險</h2>
+          <p>AI 可加速知識蒐整、出題練習與重點整理，對考試與學習很有幫助。但老師提醒，前提是使用者要有基本判斷能力，能辨識內容衝突與錯誤。若只依賴 AI 直接產出答案，可能只拿到片段知識，無法形成深度理解與獨立思辨。</p>
+
+          <h2>九、知識移轉、創造與內化循環</h2>
+          <p>老師提到知識會在內隱與外顯之間循環：經驗分享（內隱到內隱）、概念化（內隱到外顯）、組合複製（外顯到外顯）、個人吸收（外顯到內隱）。當個人累積大量外顯知識並內化後，會形成獨特風格與專業判斷，進一步再影響他人，形成新的知識創造循環。</p>
+
+          <h2>十、本章總結</h2>
+          <p>第一章重點可濃縮為一句話：把零散資料轉成可理解、可行動、可傳承、可再創造的知識。學習的關鍵不在背誦，而在於是否能分類、詮釋、內化並說給別人聽。這也是後續知識經濟與組織應用的基礎。</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="page-ch2" class="page" aria-labelledby="ch2-heading">
+      <div class="card">
+        <h2 id="ch2-heading">知識管理 2｜段落整理</h2>
+        <p class="muted">與 <code>知識管理2_段落整理.md</code> 相同。</p>
+        <div class="article-prose">
+          <h2>一、章節主題：知識經濟</h2>
+          <p>第二章重點聚焦在知識經濟的內涵、效益與發展影響。核心問題是：如何把個人、團體、組織所擁有的知識，轉換為可見價值與實際收益。老師強調，這個概念雖提出多年，但到現在仍高度相關，尤其在數位與 AI 情境下更明顯。</p>
+
+          <h2>二、知識變現的邏輯</h2>
+          <p>知識經濟的本質，是把原本無形的知識能力轉成有形產出。從早期部落格、專欄投稿，到現在社群平台、短影音、線上課程與顧問服務，都是知識變現模式。老師以知識型內容創作者為例說明：長期穩定輸出某領域內容，會逐漸形成專家定位，進而創造收入與影響力。</p>
+
+          <h2>三、知識作為關鍵生產要素</h2>
+          <p>課堂提到經濟發展從土地、勞力、資本逐步轉向知識驅動。也就是說，誰能更快吸收新知、整合知識、再利用知識，誰就更有競爭優勢。這種優勢不只存在企業，也存在個人職涯：知識密度與學習轉換能力，會直接影響成長速度。</p>
+
+          <h2>四、科技浪潮與知識經濟的循環</h2>
+          <p>老師回顧資訊化、網路化、數位轉型到 AI 應用的演進，指出每一波技術變革都會重塑知識生產與應用方式。企業過去導入 ERP、BI，現在進一步導入 AI 自動化、智慧分析與流程優化。知識經濟不是一次性現象，而是隨技術進步反覆升級的長期趨勢。</p>
+
+          <h2>五、AI 帶來的效率提升</h2>
+          <p>AI 在知識管理上的優勢很明顯：可快速蒐集、整理、摘要、萃取，並協助生成題目、報告草稿與分析內容。對個人學習來說，AI 能縮短前期資料處理時間，讓人更快進入理解與應用階段。對企業來說，AI 可提升監控、預測與決策支援效率。</p>
+
+          <h2>六、AI 時代的風險：片段化與思辨下降</h2>
+          <p>老師也提出警訊：AI 雖快，但可能讓學習變成「只拿結果、不看脈絡」。當使用者缺乏基礎判斷，容易把片段資訊當完整知識，甚至直接照抄生成內容而不驗證。長期下來會削弱思辨能力與問題分析能力。因此課堂立場不是反對 AI，而是主張「AI 輔助、人類判斷」。</p>
+
+          <h2>七、知識厚度的重要性</h2>
+          <p>同樣是知道一個名詞，是否真的理解，差異在於有沒有背景脈絡、原理關係與可操作經驗。老師用程式學習、技術分析等例子提醒：若只記結論，遇到變化情境就無法應對；若理解概念結構，才能跨情境遷移應用。知識經濟真正有價值的，不是資訊量，而是知識厚度。</p>
+
+          <h2>八、組織層面的啟示</h2>
+          <p>企業若想在知識經濟中維持優勢，不能只追新工具，還要建立持續學習、分享與更新機制。包括培訓、跨部門協作、知識保存與再利用，都是關鍵。老師提到許多企業壽命縮短，常見原因之一就是知識與制度無法跟上環境變化。</p>
+
+          <h2>九、第二章與課堂主軸的連結</h2>
+          <p>第二章其實延續第一章：先把知識整理好，才有可能進一步變現。若缺乏基礎知識管理，知識經濟只會停在口號。真正可持續的路徑是：整理知識、形成能力、持續輸出、回收反饋、再優化知識，形成正向循環。</p>
+
+          <h2>十、本章總結</h2>
+          <p>第二章可濃縮成一句話：知識經濟不是單純「靠知識賺錢」，而是讓知識持續轉成價值的系統能力。在 AI 快速發展下，效率提升很重要，但更重要的是保持判斷、驗證與思辨，確保知識不是只有速度，而是也有深度與可信度。</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="page-mc" class="page active" aria-labelledby="mc-heading">
+      <div class="card">
+        <h2 id="mc-heading">選擇題練習</h2>
+        <p class="muted">題庫共 40 題。開啟頁面會依預設題數自動出題；可改「本次題數」後按「開始新測驗」重新<strong>隨機抽題</strong>（不重複）。每頁 10 題，換頁後作答會保留。</p>
+        <div class="mc-settings">
+          <label>
+            本次題數（1–40）
+            <input type="number" id="mc-count" min="1" max="40" value="20" />
+          </label>
+          <button type="button" class="primary" id="mc-new">開始新測驗（隨機）</button>
+        </div>
+        <div class="pager" id="mc-pager" style="display:none;">
+          <span class="pager-info" id="mc-pager-info"></span>
+          <div class="pager-btns">
+            <button type="button" class="secondary" id="mc-prev">上一頁</button>
+            <button type="button" class="secondary" id="mc-next">下一頁</button>
+          </div>
+        </div>
+        <div id="mc-container"></div>
+        <div class="btn-row">
+          <button type="button" class="primary" id="mc-check-page">對本頁答案</button>
+          <button type="button" class="secondary" id="mc-check-all">對全部答案</button>
+          <button type="button" class="secondary" id="mc-clear-page">清除本頁作答</button>
+        </div>
+        <p class="score-bar" id="mc-score"></p>
+      </div>
+    </section>
+
+    <section id="page-sa" class="page" aria-labelledby="sa-heading">
+      <div class="card">
+        <h2 id="sa-heading">論述問答練習</h2>
+        <p class="muted">共 30 題（與 <code>期中考_可能題庫_選擇與問答.md</code> 問答區一致）。每題摺疊內分兩層：<strong>簡答要點</strong>（速記、關鍵詞不漏）與<strong>詳細論述指引</strong>（申論段落節奏、檢核、舉例、失分提醒）。考試若為論述題，請以詳細層為主展開成段；簡答層可用來自我檢核是否漏點。</p>
+        <div id="sa-container"></div>
+      </div>
+    </section>
+  </div>
+
+  <footer>
+    「範圍・重點・分數」與章節段落與 <code>output</code> 內 .md 同步；選擇題 40 題內建於本頁；論述問答載入 <code>sa-data.js</code>（簡答＋詳細，請與本頁同資料夾）。
+  </footer>
+
+  <script>
+    // 內嵌問答資料，避免 file:// 外部腳本載入限制
+    window.__SA_ITEMS__ = [{"title":"請說明資料、資訊、知識、智慧四者差異與關係。","brief":"層次遞進；處理程度加深；可行動性；決策／智慧。","guide":{"intro":"須寫出由下而上的轉化邏輯與每層「多了什麼處理」，不能只列四個名詞各一行。","segments":["起：界定資料為原始素材；資訊為經分類、標籤、整理後可讀可用的內容，並舉小例銜接。","承：說明知識來自資訊的比較、驗證、內化，強調可行動、可傳承，與資訊的差別。","轉：說明智慧涉及價值判斷、經驗整合與跨情境決策，避免把智慧寫成「知識很多」。","合：用一個貫穿例（學習或工作）收束，並點出停留在資料／資訊層的風險。"],"mustCover":["層次遞進","處理深度加深","可行動性由低到高","決策與判斷屬智慧","因果連結清楚","至少一具體例子"],"example":"例：蒐集論文摘要→依主題分類→形成研究假設與作法→面對矛盾證據時的取捨。","pitfalls":["只貼定義無轉換關係","四層順序錯亂","全篇無情境或例子"]}},{"title":"什麼是顯性知識與內隱知識？請各舉一例。","brief":"顯性＝可文字化、可教學；內隱＝經驗手感；各舉一例；傳承差異。","guide":{"intro":"須先定義兩類，再各舉一例並說明「為何該例屬此類」；最後一段要比較傳承難易與外顯化。","segments":["起：定義顯性（可文件化、可教學）與內隱（手感、情境、難言傳）。","承：顯性例（如 SOP、教材）＋內隱例（如廚師火候、資深客服語氣）各一段。","轉：分析為何內隱較難標準化、需要示範與練習；顯性較易複製但有僵化風險。","合：回扣知識管理：外顯化、移轉機制如何銜接兩類知識。"],"mustCover":["可文字化 vs 經驗","各一例並解釋","傳承難易比較","外顯化或移轉","與課堂用語一致"],"example":"工作例：研發文件＝顯性；除錯直覺＝內隱。學習例：公式表＝顯性；考場時間感＝內隱。","pitfalls":["只寫名詞未定義","例子與分類不符","未談傳承或外顯化"]}},{"title":"為何內隱知識較難傳承？可用哪些方法改善？","brief":"難言傳、情境依賴；改善：SOP、示範、影像、情境訓練、師徒。","guide":{"intro":"前半因果論證「難在哪」，後半措施須寫機制與配套，不能只列 SOP、示範等關鍵詞。","segments":["起：說明內隱依賴情境、身體感、默契，難完全符號化。","承：寫出後果：交接斷層、品質波動、新人上手慢。","轉：改善措施分層：SOP、錄影、師徒制、陪做、復盤會、知識庫模板等，每項一句如何運作。","合：指出無法 100% 外顯的現實與組織仍須投資的理由。"],"mustCover":["難言傳與情境依賴","具體後果","至少三種改善作法含機制","作法限制或配套","回扣組織或個人"],"example":"例：客服「何種語氣算踩線」靠帶班與錄音講評逐步外顯。","pitfalls":["只列名詞不寫因果","改善段過短像簡答","未回扣傳承問題"]}},{"title":"請說明知識管理流程，並指出每一步的重要性。","brief":"取得→儲存→整理→移轉→應用／創造；每步缺了會怎樣。","guide":{"intro":"流程須依序說明，且每一步都要寫「若缺少會怎樣」或「價值何在」，避免只背五個詞。","segments":["起：簡述知識管理是流程而非單點工具。","承：逐步寫取得→儲存→整理→移轉→應用／創造，每步 1–2 句功能。","轉：對每一步寫風險或價值（如只取得不儲存則流失）。","合：串成閉環：應用後產生新知識再回到取得／整理。"],"mustCover":["五步或六步清楚","每步有功能＋風險／價值","強調移轉與應用非選修","閉環或迭代","可帶組織或個人例"],"example":"例：個人讀書從蒐集 PDF→筆記庫→標籤→教別人→寫心得迭代。","pitfalls":["順序錯亂","只有名詞無後果","未談移轉或應用"]}},{"title":"為何老師強調不要死背定義，要用自己的話說明？","brief":"理解與遷移；申論要能舉例；用自己的話＝已內化。","guide":{"intro":"從學習與評分兩面寫：理解、遷移、溝通；並舉「死背仍不會用」的反例。","segments":["起：先肯定定義可當起點，但考題重應用與溝通。","承：用自己的話代表已重新表徵概念，利於遷移到新情境。","轉：連到期中考論述：要能舉例、比較、落地，背誦原文難展開。","合：寫你會如何練習（費曼、重述、心智圖等）作收束。"],"mustCover":["理解 vs 記憶","遷移與應用","與申論評分關聯","具體練習方法","可舉反例"],"example":"反例：背出「知識經濟定義」卻無法說明自己如何累積專業聲譽。","pitfalls":["只喊口號無機制","未連結考試或學習行為"]}},{"title":"試述知識文字化的重要性。","brief":"可記錄、可共享、可複製、跨世代傳承；利移轉與治理。","guide":{"intro":"重要性分「對個人／組織／跨時間」論證，每層有小結，勿只堆形容詞。","segments":["起：界定文字化＝外顯化的一種，是移轉與保存的前提。","承：寫可複製、可教學、可稽核、可降低交接成本。","轉：對比未文字化時的知識斷層、重工、誤解。","合：連到 AI 時代：可被檢索與再組合的知識資產。"],"mustCover":["可記錄","可共享","可複製","跨世代","與移轉／治理關聯"],"example":"例：實驗室把配方與失敗紀錄寫清，新人不必從零試錯。","pitfalls":["空泛口號","無對照未文字化的後果","無例子"]}},{"title":"說明「知識會過期、會過載」對學習者的影響與因應。","brief":"過期、過載→焦慮與誤信；因應：策展、信源、重點筆記、更新。","guide":{"intro":"過期與過載分開談；因應須寫行為層面（如何選、如何更新），不能只有「要多讀」。","segments":["起：解釋過期（環境變）與過載（來源爆炸）各是什麼。","承：對學習者的影響：焦慮、誤信過時資訊、認知負荷、淺學。","轉：因應：策展、間隔複習、信源評估、重點筆記、版本控管、同儕討論。","合：收斂到「先選可用重點」與持續更新習慣。"],"mustCover":["過期與過載分開談","具體影響","至少三種因應含做法","與課堂「重點化」呼應"],"example":"例：技術文章要看發表年與官方文件版本。","pitfalls":["兩概念混成一團","因應只有口號無行為"]}},{"title":"知識移轉對組織有何價值？","brief":"降斷層、一致性、新人上手、再利用。","guide":{"intro":"價值須寫機制：速度、品質、風險、創新；並可對照「不移轉」的後果。","segments":["起：定義移轉＝讓知識在人與人、部門間流動並被使用。","承：寫對營運：縮短學習曲線、降低單點依賴、提升決策一致性。","轉：寫對創新：跨域組合、避免重複發明輪子。","合：舉一情境（新人、專案交接）具體化。"],"mustCover":["降低斷層","一致性與品質","加速上手","促進再利用","對照無移轉"],"example":"例：客服標準話術＋資深案例庫縮短新人獨立上線時間。","pitfalls":["只列詞無組織後果","無情境"]}},{"title":"若企業發生「關鍵人才離職後效能下降」，如何以知識管理改善？","brief":"盤點、標準交接、案例庫、社群分享；短中長期措施。","guide":{"intro":"用問題解決架構：診斷原因→介入手段→預防再發；每手段寫一句如何操作。","segments":["起：描述現象與根因（知識未外顯、未交接、文化不分享）。","承：短期：盤點、標準交接、導師／影子跟班、案例庫。","轉：中期：社群實踐、復盤制度、獎勵分享；長期：治理與權責。","合：說明需持續衡量（上手時程、錯誤率）而非一次活動。"],"mustCover":["知識盤點","標準交接","案例庫或社群","文化與激勵","指標或回饋"],"example":"例：把「只有課長會批價」的流程寫成決策樹與歷史成交案例。","pitfalls":["只有口號無措施","未連結離職情境","措施無先後或責任"]}},{"title":"請說明知識整合、知識移轉、知識創造三者關係。","brief":"先整合再移轉；移轉促創造；循環。","guide":{"intro":"須畫出邏輯鏈或循環：誰先誰後、如何互相促進；避免三者各寫一段卻無連結。","segments":["起：各用一小段定義三詞，避免混同。","承：論證整合是移轉的基礎（零散難傳）。","轉：移轉帶來回饋與碰撞，促進創造；創造產生新片段再需整合。","合：用組織或學習循環一例收束。"],"mustCover":["先整合再移轉","移轉促進創造","循環或回饋","與流程五步關聯","例子"],"example":"例：讀書會整理共筆（整合）→分享給社群（移轉）→激發新專題（創造）。","pitfalls":["三者無連結","只有定義無關係","順序說錯"]}},{"title":"知識經濟的定義為何？其對個人與組織意義何在？","brief":"知識作生產要素；個人變現／聲譽；組織競爭力。","guide":{"intro":"定義要用自己的話寫完整句；意義分個人與組織兩段，每段有小結。","segments":["起：定義：知識作為關鍵生產要素，參與價值創造與競爭。","承：對個人：技能變現、聲譽、職涯韌性、終身學習。","轉：對組織：創新速度、顧客價值、流程效率、進入障礙。","合：連到本課「整理→輸出→再利用」路徑。"],"mustCover":["生產要素","價值創造","個人變現或聲譽","組織競爭力","與知識管理連結"],"example":"例：顧問公司賣的是結構化方法論與人才密度。","pitfalls":["定義過窄只寫賺錢","個人／組織缺一","無例子"]}},{"title":"請舉例說明知識如何從無形變成有形價值。","brief":"內容、顧問、教學、流程優化、產品化＝有形化路徑。","guide":{"intro":"須寫轉換機制：產品化、服務化、流程改善、品牌；例子要具體步驟與結果方向。","segments":["起：說明無形知識與有形產出差異。","承：舉 1–2 條路徑：內容訂閱、課程、顧問、專利、效率提升省成本。","轉：寫中間步驟：標準化、驗證市場、反覆迭代。","合：提醒缺乏信任或品質時有形價值難持續。"],"mustCover":["無形與有形對照","轉換機制","具體例子","結果或影響","風險或條件"],"example":"例：把客服經驗變 FAQ 與腳本→降低客訴→節省人力工時。","pitfalls":["例子空泛","無轉換步驟","只有結論無過程"]}},{"title":"你如何理解「誰能再利用知識，誰更有競爭優勢」？","brief":"再利用＝重組、速度、決策品質、迭代。","guide":{"intro":"解釋「再利用」：重組、速度、規模、學習曲線；個人與組織各一段。","segments":["起：再利用不是重讀，而是跨情境重組與加速決策。","承：寫速度與品質：同樣資訊誰能更快變行動。","轉：寫治理：索引、模組化、社群學習如何支撐再利用。","合：反思自己的再利用習慣（筆記、標籤、輸出）。"],"mustCover":["重組與迭代","決策品質","學習速度","治理與工具","個人實踐"],"example":"例：同樣看報告，有人能抽出可執行三行結論並推進專案。","pitfalls":["口號化","未解釋再利用","無個人或組織層次"]}},{"title":"AI在知識管理中可提供哪些幫助？","brief":"摘要、分類、萃取、出題、分析；人須驗證。","guide":{"intro":"分類寫：蒐集整理、分類標籤、摘要、出題、分析；每類一句價值與一句邊界（人須驗證）。","segments":["起：界定場景：個人學習與組織知識工作。","承：列 3–5 種幫助並各附使用方式。","轉：寫邊界：幻覺、機密、偏誤、著作權需人把關。","合：回扣「AI 先整理，人再判斷」。"],"mustCover":["摘要分類萃取","出題與草稿","分析輔助","限制與驗證","人機分工"],"example":"例：用 AI 先聚類顧客回饋，再由人定義改善專案。","pitfalls":["只歌頌無限制","幫助太籠統","無場景"]}},{"title":"AI應用在學習上有何風險？如何避免？","brief":"風險：片段化、錯誤、依賴；避免：查證、反思、同儕。","guide":{"intro":"風險與避免要呼應；避免段須寫可執行行為（查證、同儕、反思日誌），勿空談。","segments":["起：列風險：片段化、依賴、錯誤擴散、抄襲、思辨弱化。","承：說明機制：為何會發生（只抄結論、不讀原文）。","轉：避免：交叉驗證、出處、手寫重述、限制使用時機、教師同儕回饋。","合：提出個人學習契約或習慣。"],"mustCover":["至少三風險","每風險有對應作法","可執行行為","與課堂立場一致"],"example":"例：AI 給大綱→自己找兩篇一手來源對讀→再改寫。","pitfalls":["風險與避免不對應","只有批評無解法"]}},{"title":"何謂「素食知識」？為何需要警覺？","brief":"只看結論無脈絡；補一手來源與實作。","guide":{"intro":"先定義比喻意涵，再寫學習與決策上的後果，最後寫如何補齊脈絡與驗證。","segments":["起：定義：只看結論、不吃「過程與證據」的營養。","承：後果：換情境不會用、無法辯護立場、易被錯誤摘要誤導。","轉：警覺不是反科技，而是主動補齊：一手來源、反例、實作。","合：連到知識厚度與思辨。"],"mustCover":["定義素食知識","與片段化關聯","具體後果","補救行為","與課堂用語一致"],"example":"例：只看懶人包考申論，遇到限定情境題就空洞。","pitfalls":["定義不清","只罵 AI 未寫學習行為","無對策"]}},{"title":"請比較「AI直接給答案」與「AI輔助思考」的差異。","brief":"被動拿答案 vs 主動建構；知識厚度與責任。","guide":{"intro":"用對照表式論述但要用完整句：角色分工、認知負荷、知識厚度、責任歸屬。","segments":["起：各用一段描述兩種使用心態與流程差異。","承：比較學習結果：被動接收 vs 主動建構。","轉：比較風險：錯誤擴散、依賴、抄襲與評量公平。","合：提出你會採取的具體界線（何時用、用後做什麼）。"],"mustCover":["被動依賴 vs 主動判斷","知識厚度","責任與驗證","具體界線或習慣","與課堂立場"],"example":"例：輔助思考＝AI 產生選項，人負責淘汰與論證。","pitfalls":["只有口號無對照","未寫行為差異"]}},{"title":"如何把一門課內容從「資訊」提升到「知識」？","brief":"分類、重述、連結舊知、輸出、實作。","guide":{"intro":"須寫可操作學習動作：分類、重述、連結、輸出、實作；每步一句為何能促進內化。","segments":["起：說明課程投影片／課本是資訊，內化才是知識。","承：寫具體動作：畫架構、自問自答、做題、教同學。","轉：寫如何檢驗自己已進入知識層（能舉例、能遷移）。","合：安排一週複習節奏作結。"],"mustCover":["分類與重述","連結舊知","輸出解釋","實作應用","自我檢核標準"],"example":"例：每堂後用三句話講給自己聽，再對照課本查漏。","pitfalls":["只有口號無步驟","未解釋資訊與知識差異"]}},{"title":"老師提到「重點筆記」為何是關鍵？","brief":"濃縮、結構化、回憶線索、申論大綱。","guide":{"intro":"從認知負荷、提取線索、考試輸出三角度；並寫「不做筆記會怎樣」。","segments":["起：重點筆記＝主動萃取，不是抄黑板。","承：寫功能：結構化、壓縮、建立檢索線索。","轉：連到申論：有架構的筆記可直接變作答大綱。","合：給一個自己的筆記方法（康乃爾、問題導向等）。"],"mustCover":["濃縮","結構化","回憶線索","與申論輸出關聯","具體方法"],"example":"反例：逐字抄卻考時找不到論點。","pitfalls":["只說重要無理由","無方法或習慣"]}},{"title":"請以個人學習為例，設計一個知識管理流程。","brief":"蒐集→標籤→回顧→輸出→迭代（個人化）。","guide":{"intro":"須有「你的」場景：科目或技能；流程每步寫輸入輸出與工具，像迷你個案。","segments":["起：描述學習目標與現況痛點（忘得快、找不到筆記等）。","承：設計流程 5–6 步，每步寫產出物（檔案、標籤、回顧表）。","轉：寫如何衡量有效（測驗、實作、教別人）。","合：承認限制並寫迭代方式。"],"mustCover":["個人場景具體","每步有產出","含移轉或輸出","衡量方式","迭代"],"example":"例：週日 30 分鐘把本週散筆記改成心智圖＋三題自問。","pitfalls":["流程抄課本無個人化","步驟無產出物","無衡量"]}},{"title":"請以工作情境說明顯性/內隱知識如何互補。","brief":"文件＝下限；現場經驗＝彈性；制度銜接。","guide":{"intro":"選一職種或任務；寫何時靠文件、何時靠經驗；互補如何提升品質與效率。","segments":["起：描述工作任務與成敗關鍵。","承：顯性如何提供下限（一致、合規）。","轉：內隱如何提供上限（彈性、例外處理）。","合：寫組織如何設計制度讓兩者銜接（復盤、導師）。"],"mustCover":["具體工作情境","顯性角色","內隱角色","互補機制","制度配套"],"example":"例：醫療或客服 SOP＋資深臨場判斷。","pitfalls":["情境空泛","只定義無互補","無制度"]}},{"title":"知識管理如何支援數位轉型或AI轉型？","brief":"治理、知識結構、資料品質；AI 才落地。","guide":{"intro":"寫「沒有知識治理的 AI 只有工具」：資料品質、流程、人才、倫理；分層論證。","segments":["起：定義轉型＝流程與決策重塑，不是買軟體。","承：知識管理提供分類、權責、版本、案例庫，使訓練資料與流程可信。","轉：寫 AI 落地需要可被檢索與標註的知識資產。","合：舉一失敗反例（資料亂）與成功路徑。"],"mustCover":["治理與結構","資料／知識品質","流程與人","AI 落地條件","例子"],"example":"例：先統一客服分類與標籤，再做智能推薦。","pitfalls":["只談 AI 不談知識","無因果"]}},{"title":"若你是主管，如何提升團隊知識分享意願？","brief":"激勵、可見回饋、降成本、領導示範。","guide":{"intro":"從激勵、成本、文化、工具四類措施，每類至少一項並寫「為何能降低阻力」。","segments":["起：分析不分享原因：怕失去優勢、沒時間、沒回饋、工具難用。","承：制度：計入考績、可見感謝、減少填寫摩擦。","轉：文化：心理安全、領導示範、小勝利展示。","合：寫試辦方案與觀察指標。"],"mustCover":["診斷阻力","激勵與可見回饋","降低成本","領導示範","指標"],"example":"例：每週「十分鐘分享」固定時段＋精簡模板。","pitfalls":["只有口號","措施無對象或機制"]}},{"title":"為何有些組織有系統卻仍做不好知識管理？","brief":"工具≠流程≠文化；缺更新與責任。","guide":{"intro":"寫系統≠流程≠文化；舉「上線後無人更新」之類具體失敗模式。","segments":["起：肯定系統是必要條件但非充分。","承：流程缺口：沒有責任人、沒有更新節奏、分類標準不一。","轉：文化缺口：不分享、不信任、怕犯錯。","合：提出改善順序（先流程再工具或反之並論證）。"],"mustCover":["工具與流程區分","文化因素","具體失敗模式","改善順序","例子"],"example":"例：知識庫變垃圾堆無人下架過時文件。","pitfalls":["只怪員工","無結構分析"]}},{"title":"說明「知識管理不等於檔案管理」。","brief":"不只存檔；要理解、移轉、應用、創造。","guide":{"intro":"對照維度：目的、活動、成果指標；檔案管理偏重保存，知識管理偏重理解與使用。","segments":["起：定義兩者核心目的差異。","承：活動差異：分類標籤之外還有移轉、教學、應用、創造。","轉：指標差異：存了幾份 vs 被用幾次、解決多少問題。","合：寫若只做檔案管理會出現的組織現象。"],"mustCover":["目的對照","活動對照","成果指標","組織後果","例子"],"example":"例：雲端硬碟滿滿但新人仍問同樣問題。","pitfalls":["只有一句話重複","無對照維度"]}},{"title":"請用課堂觀點說明知識的「可落地性」。","brief":"可執行、可對話、可傳承、可改善問題。","guide":{"intro":"可落地性＝能執行、能溝通、能驗收；每點用一句例子支撐。","segments":["起：從課堂「不要死背」連到能用自己的話操作。","承：寫可執行：能變成步驟、檢查清單、決策規則。","轉：寫可對話：能教別人、能被挑戰仍站得住。","合：寫可驗收：能對照問題是否被改善。"],"mustCover":["可執行","可對話／可教學","可傳承","可改善問題","課堂連結"],"example":"例：學完知識管理能重新設計自己讀書流程。","pitfalls":["抽象形容詞","無例子","無課堂連結"]}},{"title":"CH03若考名詞整合題，你會如何作答？","brief":"先定義核心詞；關係圖；一例驗證。","guide":{"intro":"寫作答方法論：選核心詞、畫關係、配例子、控制篇幅；不必背課文但要邏輯完整。","segments":["起：說明名詞整合在考「關係推理」不是默寫。","承：步驟一：選 2–3 個核心名詞先定義。","轉：步驟二：畫因果或流程關係（可用文字描述圖）。","合：步驟三：用一個短例驗證你的關係圖合理。"],"mustCover":["核心詞定義","關係鏈","例子驗證","篇幅策略","連結 CH03"],"example":"例：先寫知識移轉再接到組織學習（依你實際修課內容替換）。","pitfalls":["只有空想無步驟","未定義名詞"]}},{"title":"請評估「AI時代人類是否還需要深度學習」。","brief":"仍要深度學習；人：判斷、倫理、脈絡、創新。","guide":{"intro":"須有立場與論證：為何仍要深度學習；人機分工；反駁「有 AI 就不用讀」的謬誤。","segments":["起：界定深度學習＝結構化理解與遷移，不是背得多。","承：論點：判斷、倫理、脈絡、創新仍依賴人。","轉：反駁：AI 加速淺學的風險反而提高深度學習價值。","合：寫你會如何配置學習時間與 AI 使用。"],"mustCover":["立場清楚","人類不可替代面向","對淺學的反駁","人機分工","個人策略"],"example":"例：醫療或法律情境下錯誤成本高，更需底層理解。","pitfalls":["兩面討論無結論","無反駁或無例子"]}},{"title":"期中若考「上課內容」而非純課本，作答策略是什麼？","brief":"老師金句、課堂案例、個人連結；先列綱。","guide":{"intro":"寫可操作的取材與輸出策略：課堂金句、案例、個人連結、時間分配；像應考備忘。","segments":["起：說明題型可能重老師強調的價值觀與例子。","承：準備：課堂關鍵句、板書結構、自己做過的作業或反思。","轉：作答：先列小綱再展開，必留一段個人經驗或立場。","合：寫考場時間分配與字數策略。"],"mustCover":["取材來源","與課本差異","作答結構","個人連結","時間字數"],"example":"例：先寫老師常說的「自己的話」再舉一課堂案例。","pitfalls":["只有泛泛讀書","無具體策略"]}},{"title":"請總結本課到目前為止最重要的學習收穫。","brief":"具體觀念＋行為改變＋未來延續；忌空話。","guide":{"intro":"總結題仍要論述：收穫須具體（觀念＋行為改變），並寫未來如何延續，不可一句「學到很多」。","segments":["起：選 2–3 個核心觀念（如四層次、顯性內隱、流程、知識經濟、AI 態度）。","承：寫你原本迷思與現在理解差異。","轉：寫行為改變：筆記、查證、分享等具體承諾。","合：寫如何在下一段課程延續（連結後續章節）。"],"mustCover":["具體觀念名稱","個人化反思","行為改變","未來延續","避免空話"],"example":"反例：只寫「獲益良多」而無觀念名與行動。","pitfalls":["空話","無觀念名稱","無行為改變"]}}];
+  </script>
+  <script>
+    (function () {
+      var PAGE_SIZE = 10;
+      var LETTERS = ["A", "B", "C", "D"];
+
+      var MC_BANK = [
+        { bankId: 1, q: "下列何者最符合「資料」的定義？", options: ["經驗判斷結果", "未整理的原始內容", "可執行策略", "已內化能力"], answer: 1 },
+        { bankId: 2, q: "下列何者最符合「資訊」？", options: ["原始數字堆疊", "經分類標籤後可理解內容", "個人直覺", "組織文化"], answer: 1 },
+        { bankId: 3, q: "下列何者最符合「知識」？", options: ["只要查得到的資料", "背下來的定義", "經理解內化後可行動、可傳承內容", "任何網路文章"], answer: 2 },
+        { bankId: 4, q: "下列何者最接近「智慧」？", options: ["看到資料就複製", "多次經驗整合後的判斷能力", "上課筆記", "AI產生的摘要"], answer: 1 },
+        { bankId: 5, q: "由低到高的層次順序為何？", options: ["智慧→知識→資訊→資料", "資料→資訊→知識→智慧", "資訊→資料→智慧→知識", "資料→知識→資訊→智慧"], answer: 1 },
+        { bankId: 6, q: "老師最強調學習時應該：", options: ["背學者原文為主", "只記名詞不求理解", "用自己的話說明概念", "完全依賴AI"], answer: 2 },
+        { bankId: 7, q: "下列何者最能代表「知識可傳承」？", options: ["全靠感覺操作", "無法記錄的技巧", "可文字化、可教學、可分享", "只存在個人記憶"], answer: 2 },
+        { bankId: 8, q: "只蒐集資料但不整理，最可能造成：", options: ["知識深度提升", "形成智慧", "資訊雜亂且難應用", "自動創造價值"], answer: 2 },
+        { bankId: 9, q: "顯性知識最主要特徵為：", options: ["難以言傳", "可被文件化", "完全主觀", "僅能口述"], answer: 1 },
+        { bankId: 10, q: "內隱知識常見特徵為：", options: ["高度標準化", "只要看文件就會", "依賴經驗與情境體會", "易完全複製"], answer: 2 },
+        { bankId: 11, q: "廚師「火候判斷」較屬於：", options: ["顯性知識", "內隱知識", "公開資料", "資訊系統"], answer: 1 },
+        { bankId: 12, q: "將內隱知識轉成顯性知識的較佳方式是：", options: ["不做紀錄", "只靠新人猜", "建立SOP並搭配示範記錄", "完全避免分享"], answer: 2 },
+        { bankId: 13, q: "下列何者較可能是顯性知識？", options: ["師傅手感", "個人直覺", "文件化操作流程", "臨場反應"], answer: 2 },
+        { bankId: 14, q: "內隱知識難傳承的主因是：", options: ["太容易理解", "難完整文字化", "完全客觀", "全部都有標準答案"], answer: 1 },
+        { bankId: 15, q: "老師提到「可移轉性」通常較高的是：", options: ["顯性知識", "內隱知識", "感受經驗", "個人風格"], answer: 0 },
+        { bankId: 16, q: "內隱知識外顯化後最可能帶來：", options: ["分享機率下降", "傳承與教學效率提升", "應用範圍縮小", "知識價值消失"], answer: 1 },
+        { bankId: 17, q: "知識管理流程中，若缺少「儲存」，常見後果是：", options: ["知識不斷累積", "知識快速流失", "成本下降", "無影響"], answer: 1 },
+        { bankId: 18, q: "「取得→儲存→整理→移轉→應用」強調的是：", options: ["單次記憶", "系統化流程", "只重工具", "不需人參與"], answer: 1 },
+        { bankId: 19, q: "知識管理若只做到「儲存」而未「移轉」，通常：", options: ["可創造最大價值", "知識價值受限", "組織學習加速", "可避免斷層"], answer: 1 },
+        { bankId: 20, q: "「關鍵人員離職後知識消失」最可能是因為：", options: ["外顯化做得好", "交接機制完整", "知識過度標準化", "缺乏知識留存與移轉機制"], answer: 3 },
+        { bankId: 21, q: "下列何者最符合「知識整合」？", options: ["原文照抄", "將零散內容分類後建立架構", "單純蒐集網址", "不做比對"], answer: 1 },
+        { bankId: 22, q: "從課堂觀點看，做「重點筆記」主要意義是：", options: ["只為抄答案", "將資料升級為資訊/知識", "減少理解", "取代思考"], answer: 1 },
+        { bankId: 23, q: "知識移轉最核心目的為：", options: ["降低可用性", "增加封閉性", "促進分享與再利用", "只留在個人腦中"], answer: 2 },
+        { bankId: 24, q: "下列哪個做法最符合「知識創造」？", options: ["完全複製舊內容", "將既有知識結合新情境形成新方法", "不斷轉貼", "只記關鍵字不應用"], answer: 1 },
+        { bankId: 25, q: "知識經濟最核心概念是：", options: ["只靠勞力生產", "以知識作為價值創造核心要素", "完全不需技術", "只重資本設備"], answer: 1 },
+        { bankId: 26, q: "下列何者屬於知識變現案例？", options: ["只收藏資料", "長期輸出專業內容並提供教學服務", "不分享經驗", "不建立個人品牌"], answer: 1 },
+        { bankId: 27, q: "知識經濟對個人最直接的意義是：", options: ["降低學習需求", "能力與知識可轉為職涯價值", "不需更新知識", "完全脫離市場"], answer: 1 },
+        { bankId: 28, q: "「知識將取代部分傳統生產要素」反映：", options: ["知識無價值", "經濟活動知識化", "產業退化", "技術停滯"], answer: 1 },
+        { bankId: 29, q: "下列何者最不符合知識經濟精神？", options: ["持續學習", "重組知識", "不更新技能", "轉化知識為價值"], answer: 2 },
+        { bankId: 30, q: "組織在知識經濟下維持競爭力，最需要：", options: ["拒絕新知", "持續吸收與再利用知識", "只靠舊流程", "減少學習"], answer: 1 },
+        { bankId: 31, q: "老師對AI在學習上的立場較接近：", options: ["完全禁止", "完全照抄", "善用AI但需判斷與驗證", "AI可取代所有思考"], answer: 2 },
+        { bankId: 32, q: "AI在知識管理中的主要優勢不包含：", options: ["快速整理", "快速萃取", "永遠100%正確", "協助生成練習題"], answer: 2 },
+        { bankId: 33, q: "「素食知識」風險主要是指：", options: ["學得太慢", "只得結論、缺乏脈絡深度", "完全無法取得資訊", "沒有工具"], answer: 1 },
+        { bankId: 34, q: "若學生直接貼AI答案不檢核，可能：", options: ["思辨能力提升", "錯誤內容被放大", "形成深度知識", "問題自動解決"], answer: 1 },
+        { bankId: 35, q: "「AI先整理，人類再判斷」主要目的為：", options: ["減少正確率", "保留人類思辨與品質控管", "放棄理解", "減少應用"], answer: 1 },
+        { bankId: 36, q: "下列何者最符合課堂建議的AI使用方式？", options: ["直接交作業", "用AI做初稿並自行交叉查核", "不讀原始內容", "不做任何修正"], answer: 1 },
+        { bankId: 37, q: "某公司文件很多但新人仍學不會，最可能缺少：", options: ["文件數量", "情境化教學與經驗移轉", "資料來源", "會議次數"], answer: 1 },
+        { bankId: 38, q: "若要降低「人走知識走」風險，首要措施為：", options: ["減少交接", "建立知識庫與標準交接流程", "不寫SOP", "只靠口頭傳承"], answer: 1 },
+        { bankId: 39, q: "下列哪一項最可能在論述問答拿高分？", options: ["只寫定義", "定義＋差異＋例子＋應用", "只貼課文", "只寫感想"], answer: 1 },
+        { bankId: 40, q: "課堂核心最可濃縮為：", options: ["追求背誦速度", "將知識轉成可理解、可行動、可傳承能力", "完全依賴工具", "只重形式"], answer: 1 }
+      ];
+
+      var SA_ITEMS = window.__SA_ITEMS__ || [];
+
+      var session = {
+        id: 0,
+        selected: [],
+        total: 0,
+        page: 0,
+        answers: {}
+      };
+
+      function showPage(name) {
+        document.querySelectorAll(".page").forEach(function (el) {
+          el.classList.toggle("active", el.id === "page-" + name);
+        });
+        document.querySelectorAll("nav button").forEach(function (btn) {
+          btn.classList.toggle("active", btn.getAttribute("data-page") === name);
+        });
+      }
+
+      document.getElementById("nav").addEventListener("click", function (e) {
+        var btn = e.target.closest("button[data-page]");
+        if (!btn) return;
+        showPage(btn.getAttribute("data-page"));
+      });
+
+      function escapeHtml(s) {
+        return String(s)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      function shuffleInPlace(arr) {
+        var i = arr.length;
+        while (i > 1) {
+          i--;
+          var j = Math.floor(Math.random() * (i + 1));
+          var t = arr[i];
+          arr[i] = arr[j];
+          arr[j] = t;
+        }
+        return arr;
+      }
+
+      function radioName(slotIndex) {
+        return "mc_" + session.id + "_" + slotIndex;
+      }
+
+      function getTotalPages() {
+        if (!session.total) return 0;
+        return Math.ceil(session.total / PAGE_SIZE);
+      }
+
+      function sliceForPage() {
+        var start = session.page * PAGE_SIZE;
+        return session.selected.slice(start, start + PAGE_SIZE);
+      }
+
+      function updatePager() {
+        var pager = document.getElementById("mc-pager");
+        var info = document.getElementById("mc-pager-info");
+        var prev = document.getElementById("mc-prev");
+        var next = document.getElementById("mc-next");
+        if (!session.total) {
+          pager.style.display = "none";
+          return;
+        }
+        pager.style.display = "flex";
+        var tp = getTotalPages();
+        info.textContent =
+          "第 " + (session.page + 1) + " / " + tp + " 頁（每頁 " + PAGE_SIZE + " 題，本次共 " + session.total + " 題）";
+        prev.disabled = session.page <= 0;
+        next.disabled = session.page >= tp - 1;
+      }
+
+      function renderMCCurrentPage() {
+        var container = document.getElementById("mc-container");
+        container.innerHTML = "";
+        var slice = sliceForPage();
+        if (!slice.length) {
+          container.innerHTML = "<p class=\"muted\">請設定題數後按「開始新測驗」。</p>";
+          updatePager();
+          return;
+        }
+        var start = session.page * PAGE_SIZE;
+        slice.forEach(function (item, i) {
+          var globalIndex = start + i;
+          var wrap = document.createElement("div");
+          wrap.className = "q-block";
+          wrap.dataset.slot = String(globalIndex);
+          var nm = radioName(globalIndex);
+          var optsHtml = item.options.map(function (text, oi) {
+            var chk = session.answers[globalIndex] === oi ? " checked" : "";
+            return (
+              "<label><input type=\"radio\" name=\"" +
+              nm +
+              "\" value=\"" +
+              oi +
+              "\"" +
+              chk +
+              "> " +
+              LETTERS[oi] +
+              ". " +
+              escapeHtml(text) +
+              "</label>"
+            );
+          }).join("");
+          wrap.innerHTML =
+            "<div class=\"q-title\">第 " +
+            (globalIndex + 1) +
+            " 題（題庫第 " +
+            item.bankId +
+            " 題）<br>" +
+            escapeHtml(item.q) +
+            "</div><div class=\"options\">" +
+            optsHtml +
+            "</div><div class=\"result\" id=\"res-" +
+            nm +
+            "\"></div>";
+          container.appendChild(wrap);
+        });
+        updatePager();
+      }
+
+      function startNewSession() {
+        var input = document.getElementById("mc-count");
+        var n = parseInt(input.value, 10);
+        if (isNaN(n) || n < 1) n = 1;
+        if (n > MC_BANK.length) n = MC_BANK.length;
+        input.value = String(n);
+        var pool = MC_BANK.slice();
+        shuffleInPlace(pool);
+        session.id = Date.now();
+        session.selected = pool.slice(0, n);
+        session.total = n;
+        session.page = 0;
+        session.answers = {};
+        document.getElementById("mc-score").textContent = "已開始新測驗，共 " + n + " 題（隨機不重複）。";
+        renderMCCurrentPage();
+      }
+
+      function getChosenIndex(slot) {
+        if (Object.prototype.hasOwnProperty.call(session.answers, slot)) {
+          return session.answers[slot];
+        }
+        var nm = radioName(slot);
+        var sel = document.querySelector("input[name=\"" + nm + "\"]:checked");
+        return sel ? parseInt(sel.value, 10) : null;
+      }
+
+      function checkRange(from, toExclusive) {
+        var correct = 0;
+        var answered = 0;
+        for (var i = from; i < toExclusive; i++) {
+          if (i >= session.selected.length) break;
+          var item = session.selected[i];
+          var nm = radioName(i);
+          var res = document.getElementById("res-" + nm);
+          if (!res) continue;
+          var v = getChosenIndex(i);
+          if (v === null || v === undefined) {
+            res.textContent = "未作答";
+            res.className = "result bad";
+            continue;
+          }
+          answered++;
+          if (v === item.answer) {
+            res.textContent = "正確 ✓";
+            res.className = "result ok";
+            correct++;
+          } else {
+            res.textContent = "錯誤 ✗（正確為 " + LETTERS[item.answer] + "）";
+            res.className = "result bad";
+          }
+        }
+        return { correct: correct, answered: answered, total: toExclusive - from };
+      }
+
+      function checkPage() {
+        var start = session.page * PAGE_SIZE;
+        var end = Math.min(start + PAGE_SIZE, session.total);
+        var r = checkRange(start, end);
+        document.getElementById("mc-score").textContent =
+          "本頁：答對 " + r.correct + " / " + (end - start) + "（已選 " + r.answered + " 題）";
+      }
+
+      function checkAll() {
+        var correct = 0;
+        var answered = 0;
+        for (var i = 0; i < session.total; i++) {
+          var v = getChosenIndex(i);
+          if (v === null || v === undefined) continue;
+          answered++;
+          if (v === session.selected[i].answer) correct++;
+        }
+        document.getElementById("mc-score").textContent =
+          "全部統計：答對 " + correct + " / " + session.total + "（已作答 " + answered + " 題；未選視為未作答）";
+        checkRange(session.page * PAGE_SIZE, Math.min(session.page * PAGE_SIZE + PAGE_SIZE, session.total));
+      }
+
+      function clearPageRadios() {
+        var start = session.page * PAGE_SIZE;
+        var end = Math.min(start + PAGE_SIZE, session.total);
+        for (var i = start; i < end; i++) {
+          delete session.answers[i];
+          var nm = radioName(i);
+          document.querySelectorAll("input[name=\"" + nm + "\"]").forEach(function (r) {
+            r.checked = false;
+          });
+          var res = document.getElementById("res-" + nm);
+          if (res) {
+            res.textContent = "";
+            res.className = "result";
+          }
+        }
+      }
+
+      document.getElementById("mc-new").addEventListener("click", startNewSession);
+      document.getElementById("mc-prev").addEventListener("click", function () {
+        if (session.page > 0) {
+          session.page--;
+          renderMCCurrentPage();
+        }
+      });
+      document.getElementById("mc-next").addEventListener("click", function () {
+        if (session.page < getTotalPages() - 1) {
+          session.page++;
+          renderMCCurrentPage();
+        }
+      });
+      document.getElementById("mc-check-page").addEventListener("click", checkPage);
+      document.getElementById("mc-check-all").addEventListener("click", checkAll);
+      document.getElementById("mc-clear-page").addEventListener("click", clearPageRadios);
+
+      document.getElementById("mc-container").addEventListener("change", function (e) {
+        var t = e.target;
+        if (!t || t.type !== "radio") return;
+        var block = t.closest(".q-block");
+        if (!block || !block.dataset.slot) return;
+        var slot = parseInt(block.dataset.slot, 10);
+        if (isNaN(slot)) return;
+        session.answers[slot] = parseInt(t.value, 10);
+      });
+
+      function renderGuideHTML(g) {
+        if (!g) {
+          return "<p class=\"muted\">（無詳細指引，請參考題庫 md。）</p>";
+        }
+        var html = "<div class=\"sa-guide\">";
+        html += "<p class=\"sa-guide-lead\">" + escapeHtml(g.intro) + "</p>";
+        if (g.segments && g.segments.length) {
+          html += "<h4 class=\"sa-h4\">建議段落節奏</h4><ol class=\"sa-ol\">";
+          g.segments.forEach(function (s) {
+            html += "<li>" + escapeHtml(s) + "</li>";
+          });
+          html += "</ol>";
+        }
+        if (g.mustCover && g.mustCover.length) {
+          html += "<h4 class=\"sa-h4\">觀念檢核</h4><ul class=\"sa-ul\">";
+          g.mustCover.forEach(function (s) {
+            html += "<li>" + escapeHtml(s) + "</li>";
+          });
+          html += "</ul>";
+        }
+        if (g.example) {
+          html += "<h4 class=\"sa-h4\">舉例方向</h4><p>" + escapeHtml(g.example) + "</p>";
+        }
+        if (g.pitfalls && g.pitfalls.length) {
+          html += "<h4 class=\"sa-h4\">易寫成簡答感的失分點</h4><ul class=\"sa-ul sa-pit\">";
+          g.pitfalls.forEach(function (s) {
+            html += "<li>" + escapeHtml(s) + "</li>";
+          });
+          html += "</ul>";
+        }
+        html += "</div>";
+        return html;
+      }
+
+      function formatBriefHtml(brief) {
+        if (!brief) {
+          return "<p class=\"sa-brief-txt muted\">（無）</p>";
+        }
+        var parts = brief.split(/[；;]/).map(function (s) {
+          return s.trim();
+        }).filter(Boolean);
+        if (parts.length <= 1) {
+          return "<p class=\"sa-brief-txt\">" + escapeHtml(brief) + "</p>";
+        }
+        return (
+          "<ul class=\"sa-brief-ul\">" +
+          parts
+            .map(function (p) {
+              return "<li>" + escapeHtml(p) + "</li>";
+            })
+            .join("") +
+          "</ul>"
+        );
+      }
+
+      function renderSA() {
+        var container = document.getElementById("sa-container");
+        if (!SA_ITEMS.length) {
+          container.innerHTML =
+            "<p class=\"muted\">無法載入 <code>sa-data.js</code>。請確認與 <code>index.html</code> 同一資料夾後重新整理。</p>";
+          return;
+        }
+        container.innerHTML = SA_ITEMS.map(function (item, i) {
+          return (
+            "<details class=\"sa-item\"><summary>" +
+            (i + 1) +
+            ". " +
+            escapeHtml(item.title) +
+            "</summary><div class=\"sa-split\">" +
+            "<div class=\"sa-brief\"><span class=\"sa-label\">簡答要點</span>" +
+            formatBriefHtml(item.brief || "") +
+            "</div>" +
+            "<details class=\"sa-detail-fold\"><summary>詳細論述指引（申論用）</summary>" +
+            renderGuideHTML(item.guide) +
+            "</details></div></details>"
+          );
+        }).join("");
+      }
+
+      renderSA();
+      startNewSession();
+    })();
+  </script>
+</body>
+</html>
